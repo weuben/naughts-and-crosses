@@ -1,13 +1,30 @@
+/*
+ * Made By Reuben Schofield :)
+ * 
+ * Naughts and Crosses game with HTML/CSS/JS
+ * 
+ * The Computer is just random moves, I'm not sure where to start with a proper computer to play against
+ * 
+ */
+
 const table = document.querySelector('.nc-table');
 const tr1 = table.children[0].children[0].children;
 const tr2 = table.children[0].children[1].children;
 const tr3 = table.children[0].children[2].children;
 const tbody = [tr1, tr2, tr3]
 const turnEl = document.querySelector('.nc-turn');
+const computer = document.getElementById('nc-computer');
 
-var turn = 0, gameMatrix;
+var turn = 0, gameMatrix, wincount = [0, 0];
 
 document.onload = init();
+
+computer.addEventListener('change', () => {
+    if (computer.checked) {
+        resetGame();
+        playComputer();
+    };
+});
 
 Array.prototype.deepIncludes = function(x) { // because Array.prototype.includes doesnt work for 2d arrays
     for (let i = 0; i < this.length; i++) {
@@ -19,8 +36,12 @@ Array.prototype.deepIncludes = function(x) { // because Array.prototype.includes
 }
 
 function init() {
-    turnEl.innerText = `Turn: ${turn % 2 ? 'O' : 'X'}`;
     gameMatrix = new Array(3).fill().map(() => new Array(3).fill(null));
+    if (computer.checked) {
+        playComputer();
+        return;
+    };
+    turnEl.innerText = `Turn: ${turn % 2 ? 'O' : 'X'}`;
     for (let i = 0; i < 3; i++) {
         for (let j = 0; j < 3; j++) {
             tbody[i][j].onclick = (e) => {
@@ -30,7 +51,7 @@ function init() {
     };
 };
 
-function ncMain(target, x, y) { //
+function ncMain(target, x, y) { // turn handling
     if (target.innerText) { return };
     target.innerText = turn % 2 ? 'O' : 'X';
     gameMatrix[x][y] = target.innerText;
@@ -75,7 +96,7 @@ function check(symbol) { // check if there is a winner
         return true;
     };
     if (!gameMatrix.deepIncludes(null)) { // check for a draw
-        setTimeout(() => {alert('Draw :('); resetGame() }, 50);
+        setTimeout(() => { alert('Draw :('); resetGame() }, 50);
     };
 };
 
@@ -89,3 +110,43 @@ function resetGame() { // reset the game duh
     };
     init();
 };
+
+// Computer section!!!!!
+
+function playComputer() { // seperate game loop for computer woo
+    turnEl.innerText = `Turn: ${turn % 2 ? 'Computer' : 'You'}`;
+    for (let i = 0; i < 3; i++) {
+        for (let j = 0; j < 3; j++) {
+            tbody[i][j].onclick = (e) => {
+                ncMainButComputer(e.target, i, j)
+            };
+        };
+    };
+};
+
+function ncMainButComputer(target, x, y) { // turn handling
+    if (target.innerText) { return };
+    target.innerText = 'X';
+    gameMatrix[x][y] = target.innerText;
+    evalWin = evaluate();
+    if (evalWin) { setTimeout(() => { alert(evalWin); resetGame() }, 50) };
+    turn++;
+    turnEl.innerText = `Turn: ${turn % 2 ? 'You' : 'Computer'}`;
+    computerTurn();
+};
+
+function computerTurn() {
+    let i = Math.floor(Math.random() * 3);
+    while (!gameMatrix[i].includes(null)) {
+        i = Math.floor(Math.random() * 3);
+    };
+    let j = Math.floor(Math.random() * 3);
+    while (gameMatrix[i][j] != null) {
+        j = Math.floor(Math.random() * 3);
+    };
+    gameMatrix[i][j] = 'O';
+    tbody[i][j].innerText = 'O';
+    evalWin = evaluate();
+    if (evalWin) { setTimeout(() => { alert(evalWin); resetGame() }, 50) };
+    turn++;
+}

@@ -1,30 +1,35 @@
 <!DOCTYPE html>
 <html>
-   <head>
-       <link rel='stylesheet' href='./style.css'>
-       <title>Naughts and Crosses</title>
-   </head>
-   <body>
-       <div class='nc-container'>
-           <table class='nc-table'>
-               <tr class='nc-tr'>
-                   <td class='nc-td'></td>
-                   <td class='nc-td'></td>
-                   <td class='nc-td'></td>
-               </tr>
-               <tr class='nc-tr'>
-                   <td class='nc-td'></td>
-                   <td class='nc-td'></td>
-                   <td class='nc-td'></td>
-               </tr>
-               <tr class='nc-tr'>
-                   <td class='nc-td'></td>
-                   <td class='nc-td'></td>
-                   <td class='nc-td'></td>
-               </tr>
-           </table>
-           <div class='nc-turn'></div>
-       </div>
+    <head>
+        <link rel='stylesheet' href='./style.css'>
+        <title>Naughts and Crosses</title>
+    </head>
+    <body>
+        <div class='nc-container'>
+            <table class='nc-table'>
+                <tr class='nc-tr'>
+                    <td class='nc-td'></td>
+                    <td class='nc-td'></td>
+                    <td class='nc-td'></td>
+                </tr>
+                <tr class='nc-tr'>
+                    <td class='nc-td'></td>
+                    <td class='nc-td'></td>
+                    <td class='nc-td'></td>
+                </tr>
+                <tr class='nc-tr'>
+                    <td class='nc-td'></td>
+                    <td class='nc-td'></td>
+                    <td class='nc-td'></td>
+                </tr>
+            </table>
+            <div class='nc-data'>
+                <div class='nc-settings'>
+                    <input type='checkbox' id='nc-computer'>Play against computer</input>
+                </div>
+                <div class='nc-turn'></div>
+            </div>
+        </div>
         <script src='./script.js'></script>
-   </body>
+    </body>
 </html>
