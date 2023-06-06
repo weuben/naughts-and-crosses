@@ -151,6 +151,7 @@ function ncMainButComputer(target, x, y) { // turn handling
             winnerEl.children[0].innerText = evalWin;
             winnerEl.style.visibility = 'visible';
         }, 50);
+        return;
     };
     turn++;
     turnEl.innerText = `Turn: ${turn % 2 ? 'You' : 'Computer'}`;
