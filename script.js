@@ -13,7 +13,8 @@ const tr2 = table.children[0].children[1].children;
 const tr3 = table.children[0].children[2].children;
 const tbody = [tr1, tr2, tr3]
 const turnEl = document.querySelector('.nc-turn');
-const computer = document.getElementById('nc-computer');
+const computer = document.querySelector('#nc-computer');
+const winnerEl = document.querySelector('.nc-winner');
 
 var turn = 0, gameMatrix, wincount = [0, 0];
 
@@ -21,12 +22,11 @@ document.onload = init();
 
 computer.addEventListener('change', () => {
     if (computer.checked) {
-        resetGame();
         playComputer();
     };
 });
 
-Array.prototype.deepIncludes = function(x) { // because Array.prototype.includes doesnt work for 2d arrays
+Array.prototype.deepIncludes = function (x) { // because Array.prototype.includes() doesnt work for 2d arrays
     for (let i = 0; i < this.length; i++) {
         if (this[i].includes(x)) {
             return true;
@@ -56,16 +56,22 @@ function ncMain(target, x, y) { // turn handling
     target.innerText = turn % 2 ? 'O' : 'X';
     gameMatrix[x][y] = target.innerText;
     evalWin = evaluate();
-    if (evalWin) { setTimeout(() => { alert(evalWin); resetGame() }, 50) };
+    if (evalWin) {
+        setTimeout(() => {
+            winnerEl.children[0].innerText = evalWin;
+            winnerEl.style.visibility = 'visible';
+        }, 50);
+    };
     turn++;
     turnEl.innerText = `Turn: ${turn % 2 ? 'O' : 'X'}`;
 };
 
 function evaluate() { // i dont think i need this
-    console.table(gameMatrix);
     if (check('X')) {
+        stopListeners();
         return 'X Won!';
     } else if (check('O')) {
+        stopListeners();
         return 'O Won!';
     };
 };
@@ -96,19 +102,30 @@ function check(symbol) { // check if there is a winner
         return true;
     };
     if (!gameMatrix.deepIncludes(null)) { // check for a draw
-        setTimeout(() => { alert('Draw :('); resetGame() }, 50);
+        setTimeout(() => {
+            winnerEl.children[0].innerText = 'Draw :(';
+            winnerEl.style.visibility = 'visible';
+        }, 50);
     };
 };
 
 function resetGame() { // reset the game duh
+    winnerEl.style.visibility = 'hidden';
     turn = 0;
     for (let i = 0; i < 3; i++) {
         for (let j = 0; j < 3; j++) {
             tbody[i][j].innerText = '';
-            tbody[i][j].onclick = null;
         };
     };
     init();
+};
+
+function stopListeners() { // stop the click listeners for when game has stopped
+    for (let i = 0; i < 3; i++) {
+        for (let j = 0; j < 3; j++) {
+            tbody[i][j].onclick = null;
+        };
+    };
 };
 
 // Computer section!!!!!
@@ -129,7 +146,12 @@ function ncMainButComputer(target, x, y) { // turn handling
     target.innerText = 'X';
     gameMatrix[x][y] = target.innerText;
     evalWin = evaluate();
-    if (evalWin) { setTimeout(() => { alert(evalWin); resetGame() }, 50) };
+    if (evalWin) {
+        setTimeout(() => {
+            winnerEl.children[0].innerText = evalWin;
+            winnerEl.style.visibility = 'visible';
+        }, 50);
+    };
     turn++;
     turnEl.innerText = `Turn: ${turn % 2 ? 'You' : 'Computer'}`;
     computerTurn();
@@ -147,6 +169,11 @@ function computerTurn() {
     gameMatrix[i][j] = 'O';
     tbody[i][j].innerText = 'O';
     evalWin = evaluate();
-    if (evalWin) { setTimeout(() => { alert(evalWin); resetGame() }, 50) };
+    if (evalWin) {
+        setTimeout(() => {
+            winnerEl.children[0].innerText = evalWin;
+            winnerEl.style.visibility = 'visible';
+        }, 50);
+    };
     turn++;
 }
