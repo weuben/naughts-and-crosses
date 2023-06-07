@@ -21,6 +21,7 @@ var turn = 0, gameMatrix, wincount = [0, 0];
 document.onload = init();
 
 computer.addEventListener('change', () => {
+    resetGame();
     if (computer.checked) {
         playComputer();
     };
@@ -73,7 +74,9 @@ function evaluate() { // i dont think i need this
     } else if (check('O')) {
         stopListeners();
         return 'O Won!';
-    };
+    } else if (!gameMatrix.deepIncludes(null)) { // check for draw
+        return 'Draw :(';
+    }
 };
 
 function check(symbol) { // check if there is a winner
@@ -100,12 +103,6 @@ function check(symbol) { // check if there is a winner
         gameMatrix[0][2] === gameMatrix[1][1] &&
         gameMatrix[1][1] === gameMatrix[2][0]) { // check second diagonal
         return true;
-    };
-    if (!gameMatrix.deepIncludes(null)) { // check for a draw
-        setTimeout(() => {
-            winnerEl.children[0].innerText = 'Draw :(';
-            winnerEl.style.visibility = 'visible';
-        }, 50);
     };
 };
 
@@ -175,6 +172,7 @@ function computerTurn() {
             winnerEl.children[0].innerText = evalWin;
             winnerEl.style.visibility = 'visible';
         }, 50);
+        return;
     };
     turn++;
 }
