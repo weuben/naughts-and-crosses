@@ -1,11 +1,15 @@
 /*
- * Made By Reuben Schofield :)
+ * made By reuben schofield :)
  * 
- * Naughts and Crosses game with HTML/CSS/JS
+ * naughts and crosses game with HTML/CSS/JS
  * 
- * The Computer is just random moves, I'm not sure where to start with a proper computer to play against
+ * the computer is just random moves, im not sure where to start with a proper computer to play against
  * 
+ * also I used setTimeout() in evaluating because I want the last move to load properly
+ 
  */
+
+// variable section -------------------------------------------->
 
 const table = document.querySelector('.nc-table');
 const tr1 = table.children[0].children[0].children;
@@ -18,14 +22,18 @@ const winnerEl = document.querySelector('.nc-winner');
 
 var turn = 0, gameMatrix, wincount = [0, 0];
 
-document.onload = init();
+// listener section -------------------------------------------->
 
-computer.addEventListener('change', () => {
-    resetGame();
+document.onload = ncStart();
+
+computer.onchange = () => {
+    ncReset();
     if (computer.checked) {
-        playComputer();
+        ncPlayComputer();
     };
-});
+};
+
+// that one function that i need that one time section --------->
 
 Array.prototype.deepIncludes = function (x) { // because Array.prototype.includes() doesnt work for 2d arrays
     for (let i = 0; i < this.length; i++) {
@@ -36,13 +44,61 @@ Array.prototype.deepIncludes = function (x) { // because Array.prototype.include
     return false;
 }
 
-function init() {
+// normal play section ----------------------------------------->
+
+function ncMain(target, x, y) { // turn handling
+    if (target.innerText) { return };
+    target.innerText = turn % 2 ? 'O' : 'X';
+    gameMatrix[x][y] = target.innerText;
+    ncEvaluate();
+    turn++;
+    turnEl.innerText = `Turn:\n${turn % 2 ? 'O' : 'X'}`;
+};
+
+function ncEvaluate() { // evaluating the board :)
+    if (ncCheck()) {
+        ncStop(`${ncCheck()} won!`);
+    } else if (!gameMatrix.deepIncludes(null)) { // check for draw
+        ncStop('Draw :(');
+    };
+};
+
+function ncCheck() { // check if there is a winner
+    for (let i = 0; i < 3; i++) { // check rows
+        if (gameMatrix[i][0] &&
+            gameMatrix[i][0] === gameMatrix[i][1] &&
+            gameMatrix[i][1] === gameMatrix[i][2]) {
+            return gameMatrix[i][0];
+        };
+    };
+    for (let i = 0; i < 3; i++) { // check columns
+        if (gameMatrix[0][i] &&
+            gameMatrix[0][i] === gameMatrix[1][i] &&
+            gameMatrix[1][i] === gameMatrix[2][i]) {
+            return gameMatrix[0][i];
+        };
+    };
+    if (gameMatrix[0][0] &&
+        gameMatrix[0][0] === gameMatrix[1][1] &&
+        gameMatrix[1][1] === gameMatrix[2][2]) { // check first diagonal
+        return gameMatrix[0][0];
+    };
+    if (gameMatrix[0][2] &&
+        gameMatrix[0][2] === gameMatrix[1][1] &&
+        gameMatrix[1][1] === gameMatrix[2][0]) { // check second diagonal
+        return gameMatrix[0][2];
+    };
+};
+
+// game handling section --------------------------------------->
+
+function ncStart() {
     gameMatrix = new Array(3).fill().map(() => new Array(3).fill(null));
     if (computer.checked) {
-        playComputer();
+        ncPlayComputer();
         return;
     };
-    turnEl.innerText = `Turn: ${turn % 2 ? 'O' : 'X'}`;
+    turnEl.innerText = `Turn:\n${turn % 2 ? 'O' : 'X'}`;
     for (let i = 0; i < 3; i++) {
         for (let j = 0; j < 3; j++) {
             tbody[i][j].onclick = (e) => {
@@ -52,61 +108,7 @@ function init() {
     };
 };
 
-function ncMain(target, x, y) { // turn handling
-    if (target.innerText) { return };
-    target.innerText = turn % 2 ? 'O' : 'X';
-    gameMatrix[x][y] = target.innerText;
-    evalWin = evaluate();
-    if (evalWin) {
-        setTimeout(() => {
-            winnerEl.children[0].innerText = evalWin;
-            winnerEl.style.visibility = 'visible';
-        }, 50);
-    };
-    turn++;
-    turnEl.innerText = `Turn: ${turn % 2 ? 'O' : 'X'}`;
-};
-
-function evaluate() { // i dont think i need this
-    if (check('X')) {
-        stopListeners();
-        return 'X Won!';
-    } else if (check('O')) {
-        stopListeners();
-        return 'O Won!';
-    } else if (!gameMatrix.deepIncludes(null)) { // check for draw
-        return 'Draw :(';
-    }
-};
-
-function check(symbol) { // check if there is a winner
-    for (let i = 0; i < 3; i++) { // check rows
-        if (gameMatrix[i][0] === symbol &&
-            gameMatrix[i][0] === gameMatrix[i][1] &&
-            gameMatrix[i][1] === gameMatrix[i][2]) {
-            return true;
-        };
-    };
-    for (let i = 0; i < 3; i++) { // check columns
-        if (gameMatrix[0][i] === symbol &&
-            gameMatrix[0][i] === gameMatrix[1][i] &&
-            gameMatrix[1][i] === gameMatrix[2][i]) {
-            return true;
-        };
-    };
-    if (gameMatrix[0][0] === symbol &&
-        gameMatrix[0][0] === gameMatrix[1][1] &&
-        gameMatrix[1][1] === gameMatrix[2][2]) { // check first diagonal
-        return true;
-    };
-    if (gameMatrix[0][2] === symbol &&
-        gameMatrix[0][2] === gameMatrix[1][1] &&
-        gameMatrix[1][1] === gameMatrix[2][0]) { // check second diagonal
-        return true;
-    };
-};
-
-function resetGame() { // reset the game duh
+function ncReset() { // reset the game duh
     winnerEl.style.visibility = 'hidden';
     turn = 0;
     for (let i = 0; i < 3; i++) {
@@ -114,10 +116,14 @@ function resetGame() { // reset the game duh
             tbody[i][j].innerText = '';
         };
     };
-    init();
+    ncStart();
 };
 
-function stopListeners() { // stop the click listeners for when game has stopped
+function ncStop(msg) { // stop the click listeners for when game has stopped
+    setTimeout(() => {
+        winnerEl.children[0].innerText = msg;
+        winnerEl.style.visibility = 'visible';
+    }, 50);
     for (let i = 0; i < 3; i++) {
         for (let j = 0; j < 3; j++) {
             tbody[i][j].onclick = null;
@@ -125,10 +131,10 @@ function stopListeners() { // stop the click listeners for when game has stopped
     };
 };
 
-// Computer section!!!!!
+// computer section -------------------------------------------->
 
-function playComputer() { // seperate game loop for computer woo
-    turnEl.innerText = `Turn: ${turn % 2 ? 'Computer' : 'You'}`;
+function ncPlayComputer() { // seperate game loop for computer woo
+    turnEl.innerText = `Turn:\n${turn % 2 ? 'Computer' : 'You'}`;
     for (let i = 0; i < 3; i++) {
         for (let j = 0; j < 3; j++) {
             tbody[i][j].onclick = (e) => {
@@ -142,37 +148,23 @@ function ncMainButComputer(target, x, y) { // turn handling
     if (target.innerText) { return };
     target.innerText = 'X';
     gameMatrix[x][y] = target.innerText;
-    evalWin = evaluate();
-    if (evalWin) {
-        setTimeout(() => {
-            winnerEl.children[0].innerText = evalWin;
-            winnerEl.style.visibility = 'visible';
-        }, 50);
-        return;
-    };
+    ncEvaluate();
     turn++;
-    turnEl.innerText = `Turn: ${turn % 2 ? 'You' : 'Computer'}`;
-    computerTurn();
+    turnEl.innerText = `Turn:\n${turn % 2 ? 'You' : 'Computer'}`;
+    ncComputerTurn();
 };
 
-function computerTurn() {
+function ncComputerTurn() {
     let i = Math.floor(Math.random() * 3);
     while (!gameMatrix[i].includes(null)) {
         i = Math.floor(Math.random() * 3);
     };
     let j = Math.floor(Math.random() * 3);
-    while (gameMatrix[i][j] != null) {
+    while (gameMatrix[i][j]) {
         j = Math.floor(Math.random() * 3);
     };
     gameMatrix[i][j] = 'O';
     tbody[i][j].innerText = 'O';
-    evalWin = evaluate();
-    if (evalWin) {
-        setTimeout(() => {
-            winnerEl.children[0].innerText = evalWin;
-            winnerEl.style.visibility = 'visible';
-        }, 50);
-        return;
-    };
+    ncEvaluate();
     turn++;
 }
