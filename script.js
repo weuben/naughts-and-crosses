@@ -1,11 +1,15 @@
 /*
- * Made By Reuben Schofield :)
+ * made By reuben schofield :)
  * 
- * Naughts and Crosses game with HTML/CSS/JS
+ * naughts and crosses game with HTML/CSS/JS
  * 
- * The Computer is just random moves, I'm not sure where to start with a proper computer to play against
+ * the computer is just random moves, im not sure where to start with a proper computer to play against
  * 
+ * also I used setTimeout() in evaluating because I want the last move to load properly
+ 
  */
+
+// variable section -------------------------------------------->
 
 const table = document.querySelector('.nc-table');
 const tr1 = table.children[0].children[0].children;
@@ -16,16 +20,20 @@ const turnEl = document.querySelector('.nc-turn');
 const computer = document.querySelector('#nc-computer');
 const winnerEl = document.querySelector('.nc-winner');
 
-var turn = 0, gameMatrix, wincount = [0, 0];
+var turn = 0, ncMatrix, wincount = [0, 0];
 
-document.onload = init();
+// listener section -------------------------------------------->
 
-computer.addEventListener('change', () => {
-    resetGame();
+document.onload = ncStart();
+
+computer.onchange = () => {
+    ncReset();
     if (computer.checked) {
-        playComputer();
+        ncPlayComputer();
     };
-});
+};
+
+// that one function that i need that one time section --------->
 
 Array.prototype.deepIncludes = function (x) { // because Array.prototype.includes() doesnt work for 2d arrays
     for (let i = 0; i < this.length; i++) {
@@ -34,15 +42,65 @@ Array.prototype.deepIncludes = function (x) { // because Array.prototype.include
         };
     };
     return false;
-}
+};
 
-function init() {
-    gameMatrix = new Array(3).fill().map(() => new Array(3).fill(null));
+// normal play section ----------------------------------------->
+
+function ncMain(target, x, y) { // turn handling
+    if (target.innerText) { return };
+    target.innerText = turn % 2 ? 'O' : 'X';
+    ncMatrix[x][y] = target.innerText;
+    if (ncEvaluate()) { return };
+    turn++;
+    turnEl.innerText = `Turn:\n${turn % 2 ? 'O' : 'X'}`;
+};
+
+function ncEvaluate() { // evaluating the board :)
+    if (ncCheck()) {
+        ncStop(`${ncCheck()} won!`);
+        return true;
+    } else if (!ncMatrix.deepIncludes(null)) { // check for draw
+        ncStop('Draw :(');
+        return true;
+    };
+};
+
+function ncCheck() { // check if there is a winner
+    for (let i = 0; i < 3; i++) { // check rows
+        if (ncMatrix[i][0] &&
+            ncMatrix[i][0] === ncMatrix[i][1] &&
+            ncMatrix[i][1] === ncMatrix[i][2]) {
+            return ncMatrix[i][0];
+        };
+    };
+    for (let i = 0; i < 3; i++) { // check columns
+        if (ncMatrix[0][i] &&
+            ncMatrix[0][i] === ncMatrix[1][i] &&
+            ncMatrix[1][i] === ncMatrix[2][i]) {
+            return ncMatrix[0][i];
+        };
+    };
+    if (ncMatrix[0][0] &&
+        ncMatrix[0][0] === ncMatrix[1][1] &&
+        ncMatrix[1][1] === ncMatrix[2][2]) { // check first diagonal
+        return ncMatrix[0][0];
+    };
+    if (ncMatrix[0][2] &&
+        ncMatrix[0][2] === ncMatrix[1][1] &&
+        ncMatrix[1][1] === ncMatrix[2][0]) { // check second diagonal
+        return ncMatrix[0][2];
+    };
+};
+
+// game handling section --------------------------------------->
+
+function ncStart() {
+    ncMatrix = new Array(3).fill().map(() => new Array(3).fill(null));
     if (computer.checked) {
-        playComputer();
+        ncPlayComputer();
         return;
     };
-    turnEl.innerText = `Turn: ${turn % 2 ? 'O' : 'X'}`;
+    turnEl.innerText = `Turn:\n${turn % 2 ? 'O' : 'X'}`;
     for (let i = 0; i < 3; i++) {
         for (let j = 0; j < 3; j++) {
             tbody[i][j].onclick = (e) => {
@@ -52,61 +110,7 @@ function init() {
     };
 };
 
-function ncMain(target, x, y) { // turn handling
-    if (target.innerText) { return };
-    target.innerText = turn % 2 ? 'O' : 'X';
-    gameMatrix[x][y] = target.innerText;
-    evalWin = evaluate();
-    if (evalWin) {
-        setTimeout(() => {
-            winnerEl.children[0].innerText = evalWin;
-            winnerEl.style.visibility = 'visible';
-        }, 50);
-    };
-    turn++;
-    turnEl.innerText = `Turn: ${turn % 2 ? 'O' : 'X'}`;
-};
-
-function evaluate() { // i dont think i need this
-    if (check('X')) {
-        stopListeners();
-        return 'X Won!';
-    } else if (check('O')) {
-        stopListeners();
-        return 'O Won!';
-    } else if (!gameMatrix.deepIncludes(null)) { // check for draw
-        return 'Draw :(';
-    }
-};
-
-function check(symbol) { // check if there is a winner
-    for (let i = 0; i < 3; i++) { // check rows
-        if (gameMatrix[i][0] === symbol &&
-            gameMatrix[i][0] === gameMatrix[i][1] &&
-            gameMatrix[i][1] === gameMatrix[i][2]) {
-            return true;
-        };
-    };
-    for (let i = 0; i < 3; i++) { // check columns
-        if (gameMatrix[0][i] === symbol &&
-            gameMatrix[0][i] === gameMatrix[1][i] &&
-            gameMatrix[1][i] === gameMatrix[2][i]) {
-            return true;
-        };
-    };
-    if (gameMatrix[0][0] === symbol &&
-        gameMatrix[0][0] === gameMatrix[1][1] &&
-        gameMatrix[1][1] === gameMatrix[2][2]) { // check first diagonal
-        return true;
-    };
-    if (gameMatrix[0][2] === symbol &&
-        gameMatrix[0][2] === gameMatrix[1][1] &&
-        gameMatrix[1][1] === gameMatrix[2][0]) { // check second diagonal
-        return true;
-    };
-};
-
-function resetGame() { // reset the game duh
+function ncReset() { // reset the game duh
     winnerEl.style.visibility = 'hidden';
     turn = 0;
     for (let i = 0; i < 3; i++) {
@@ -114,10 +118,15 @@ function resetGame() { // reset the game duh
             tbody[i][j].innerText = '';
         };
     };
-    init();
+    ncStart();
 };
 
-function stopListeners() { // stop the click listeners for when game has stopped
+function ncStop(msg) { // stop the click listeners for when game has stopped
+    setTimeout(() => {
+        turnEl.innerText = 'Turn:\nN/A';
+        winnerEl.children[0].innerText = msg;
+        winnerEl.style.visibility = 'visible';
+    }, 50);
     for (let i = 0; i < 3; i++) {
         for (let j = 0; j < 3; j++) {
             tbody[i][j].onclick = null;
@@ -125,10 +134,10 @@ function stopListeners() { // stop the click listeners for when game has stopped
     };
 };
 
-// Computer section!!!!!
+// computer section -------------------------------------------->
 
-function playComputer() { // seperate game loop for computer woo
-    turnEl.innerText = `Turn: ${turn % 2 ? 'Computer' : 'You'}`;
+function ncPlayComputer() { // seperate game loop for computer woo
+    turnEl.innerText = `Turn:\n${turn % 2 ? 'Computer' : 'You'}`;
     for (let i = 0; i < 3; i++) {
         for (let j = 0; j < 3; j++) {
             tbody[i][j].onclick = (e) => {
@@ -141,38 +150,159 @@ function playComputer() { // seperate game loop for computer woo
 function ncMainButComputer(target, x, y) { // turn handling
     if (target.innerText) { return };
     target.innerText = 'X';
-    gameMatrix[x][y] = target.innerText;
-    evalWin = evaluate();
-    if (evalWin) {
-        setTimeout(() => {
-            winnerEl.children[0].innerText = evalWin;
-            winnerEl.style.visibility = 'visible';
-        }, 50);
-        return;
-    };
+    ncMatrix[x][y] = target.innerText;
+    if (ncEvaluate()) { return };
     turn++;
-    turnEl.innerText = `Turn: ${turn % 2 ? 'You' : 'Computer'}`;
-    computerTurn();
+    turnEl.innerText = `Turn:\n${turn % 2 ? 'You' : 'Computer'}`;
+    ncComputerTurn();
 };
 
-function computerTurn() {
+function ncComputerTurn() {
+
+    // column win opportunities
+
+    for (let i = 0; i < 3; i++) {
+        let j = ncMatrix[i].indexOf(null);
+
+        if (ncMatrix[i].includes(null) &&
+            ncMatrix[i].join('').match(/O/g) ?
+            ncMatrix[i].join('').match(/O/g).length === 2 :
+            false) {
+            ncMatrix[i][j] = 'O';
+            tbody[i][j].innerText = 'O';
+            turn++;
+            ncEvaluate();
+            return;
+        };
+    };
+
+    // row win opportunities
+
+    for (let i = 0; i < 3; i++) {
+        let temp = [];
+        for (let j = 0; j < 3; j++) {
+            temp.push(ncMatrix[j][i]);
+        };
+        let j = temp.indexOf(null);
+
+        if (temp.includes(null) &&
+            temp.join('').match(/X/g) ?
+            temp.join('').match(/X/g).length === 2 :
+            false) {
+            ncMatrix[j][i] = 'O';
+            tbody[j][i].innerText = 'O';
+            turn++;
+            ncEvaluate();
+            return;
+        };
+    };
+
+    // diagonal win opportunities
+
+    let temp = [[], []];
+    for (let j = 0, k = 2; j < 3; j++, k--) {
+        temp[0].push(ncMatrix[j][k]);
+        temp[1].push(ncMatrix[j][j]);
+    };
+
+    for (let i = 0; i < 2; i++) {
+        let j = temp[i].indexOf(null);
+        if (temp[i].includes(null) &&
+            temp[i].join('').match(/O/g) ?
+            temp[i].join('').match(/O/g).length === 2 :
+            false) {
+            if (!i) {
+                ncMatrix[j][j] = 'O';
+                tbody[j][j].innerText = 'O';
+            } else {
+                ncMatrix[j][2 - j] = 'O';
+                tbody[j][2 - j] = 'O';
+            };
+            turn++;
+            ncEvaluate();
+            return;
+        };
+    };
+
+    // column threats
+
+    for (let i = 0; i < 3; i++) {
+        let j = ncMatrix[i].indexOf(null);
+
+        if (ncMatrix[i].includes(null) &&
+            ncMatrix[i].join('').match(/X/g) ?
+            ncMatrix[i].join('').match(/X/g).length === 2 :
+            false) {
+            ncMatrix[i][j] = 'O';
+            tbody[i][j].innerText = 'O';
+            turn++;
+            ncEvaluate();
+            return;
+        };
+    };
+
+    // row threats
+
+    for (let i = 0; i < 3; i++) {
+        let temp = [];
+        for (let j = 0; j < 3; j++) {
+            temp.push(ncMatrix[j][i]);
+        };
+        let j = temp.indexOf(null)
+
+        if (temp.includes(null) &&
+            temp.join('').match(/O/g) ?
+            temp.join('').match(/O/g).length === 2 :
+            false) {
+            console.log(j, i);
+            ncMatrix[j][i] = 'O';
+            tbody[j][i].innerText = 'O';
+            turn++;
+            ncEvaluate();
+            return;
+        };
+    };
+
+    // diagonal threats
+
+    let temp2 = [[], []];
+    for (let j = 0, k = 2; j < 3; j++, k--) {
+        temp2[0].push(ncMatrix[j][k]);
+        temp2[1].push(ncMatrix[j][j]);
+    };
+
+    for (let i = 0; i < 2; i++) {
+        let j = temp2[i].indexOf(null);
+        if (temp2[i].includes(null) &&
+            temp2[i].join('').match(/X/g) ?
+            temp2[i].join('').match(/X/g).length === 2 :
+            false) {
+            if (i) {
+                ncMatrix[j][j] = 'O';
+                tbody[j][j].innerText = 'O';
+            } else {
+                ncMatrix[j][2 - j] = 'O';
+                tbody[j][2 - j].innerText = 'O';
+            };
+            turn++;
+            ncEvaluate();
+            return;
+        };
+    };
+
+    // random move if nothing is detected
+
     let i = Math.floor(Math.random() * 3);
-    while (!gameMatrix[i].includes(null)) {
+    while (!ncMatrix[i].includes(null)) {
         i = Math.floor(Math.random() * 3);
     };
     let j = Math.floor(Math.random() * 3);
-    while (gameMatrix[i][j] != null) {
+    while (ncMatrix[i][j]) {
         j = Math.floor(Math.random() * 3);
     };
-    gameMatrix[i][j] = 'O';
+    ncMatrix[i][j] = 'O';
     tbody[i][j].innerText = 'O';
-    evalWin = evaluate();
-    if (evalWin) {
-        setTimeout(() => {
-            winnerEl.children[0].innerText = evalWin;
-            winnerEl.style.visibility = 'visible';
-        }, 50);
-        return;
-    };
     turn++;
-}
+    ncEvaluate();
+    return;
+};
