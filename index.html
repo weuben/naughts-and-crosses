@@ -25,15 +25,13 @@
                 <td class='nc-td'></td>
             </tr>
         </table>
-        <div class='nc-data'>
-            <div class='nc-settings'>
-                <input type='checkbox' id='nc-computer'>Play against computer (has bugs)</input>
-            </div>
-            <div class='nc-turn'></div>
-            <div class='nc-winner' style='visibility:hidden'>
-                <p>won!</p>
-                <button onclick='ncReset()'>Play Again</button>
-            </div>
+        <div class='nc-turn'></div>
+        <div class='nc-winner' style='display:none'>
+            <p>won!</p>
+            <button onclick='reset()'>Play Again</button>
+        </div>
+        <div class='nc-settings'>
+            <input type='checkbox' id='nc-computer'>Play against computer (potentially unbeatable)</input>
         </div>
     </div>
     <script src='./script.js'></script>
