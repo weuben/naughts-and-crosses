@@ -19,19 +19,17 @@ const tbody = [tr1, tr2, tr3]
 const turnEl = document.querySelector('.nc-turn');
 const computer = document.querySelector('#nc-computer');
 const winnerEl = document.querySelector('.nc-winner');
+const starterEl = document.querySelector('#nc-starter');
+const starter = () => parseInt(starterEl.value);
 
 var turn = 0, matrix, wincount = [0, 0];
 
 // listener section -------------------------------------------->
 
-document.onload = start();
+window.onload = start;
 
-computer.onchange = () => {
-    reset();
-    if (computer.checked) {
-        playComputer();
-    };
-};
+computer.onchange = reset;
+starterEl.onchange = reset;
 
 // that one function that i need that one time section --------->
 
@@ -48,11 +46,11 @@ Array.prototype.deepIncludes = function (x) { // because Array.prototype.include
 
 function main(target, x, y) { // turn handling
     if (target.innerText) { return };
-    target.innerText = turn % 2 ? 'O' : 'X';
+    target.innerText = calcTurn();
     matrix[x][y] = target.innerText;
     if (evaluate()) { return };
     turn++;
-    turnEl.innerText = `Turn: ${turn % 2 ? 'O' : 'X'}`;
+    turnEl.innerText = `Turn: ${calcTurn()}`;
 };
 
 function evaluate() { // evaluating the board :)
@@ -97,10 +95,15 @@ function check() { // check if there is a winner
 function start() {
     matrix = new Array(3).fill().map(() => new Array(3).fill(null));
     if (computer.checked) {
+        starterEl[0].innerText = 'You';
+        starterEl[1].innerText = 'Computer';
         playComputer();
         return;
+    } else {
+        starterEl[0].innerText = 'X';
+        starterEl[1].innerText = 'O';
     };
-    turnEl.innerText = `Turn: ${turn % 2 ? 'O' : 'X'}`;
+    turnEl.innerText = `Turn: ${calcTurn()}`;
     for (let i = 0; i < 3; i++) {
         for (let j = 0; j < 3; j++) {
             tbody[i][j].onclick = (e) => {
@@ -136,10 +139,26 @@ function stop(msg) { // stop the click listeners for when game has stopped
     };
 };
 
+function calcTurn() {
+    if (computer.checked) {
+        x = 'Computer';
+        o = 'You';
+    } else {
+        x = 'X';
+        o = 'O';
+    };
+    return parseInt(starterEl.value) ?
+        turn % 2 ? o : x :
+        turn % 2 ? x : o;
+}
+
 // computer section -------------------------------------------->
 
 function playComputer() { // seperate game loop for computer woo
-    turnEl.innerText = `Turn: ${turn % 2 ? 'Computer' : 'You'}`;
+    turnEl.innerText = `Turn: ${calcTurn()}`;
+    if (!starter()) {
+        computerTurn();
+    };
     for (let i = 0; i < 3; i++) {
         for (let j = 0; j < 3; j++) {
             tbody[i][j].onclick = (e) => {
@@ -155,7 +174,7 @@ function computerMain(target, x, y) { // turn handling
     matrix[x][y] = target.innerText;
     if (evaluate()) { return };
     turn++;
-    turnEl.innerText = `Turn: ${turn % 2 ? 'You' : 'Computer'}`;
+    turnEl.innerText = `Turn: ${calcTurn()}`;
     computerTurn();
 };
 
@@ -167,9 +186,7 @@ function computerTurn() {
         let j = matrix[i].indexOf(null);
 
         if (matrix[i].includes(null) &&
-            matrix[i].join('').match(/O/g) ?
-            matrix[i].join('').match(/O/g).length === 2 :
-            false) {
+            matrix[i].join('').match(/O/g)?.length === 2) {
             playComputerMove(i, j);
             console.log('row win opportunity')
             return;
@@ -186,9 +203,7 @@ function computerTurn() {
         let j = temp.indexOf(null);
 
         if (temp.includes(null) &&
-            temp.join('').match(/O/g) ?
-            temp.join('').match(/O/g).length === 2 :
-            false) {
+            temp.join('').match(/O/g)?.length === 2) {
             playComputerMove(j, i);
             console.log('column win opportunity')
             return;
@@ -206,9 +221,7 @@ function computerTurn() {
     for (let i = 0; i < 2; i++) {
         let j = temp[i].indexOf(null);
         if (temp[i].includes(null) &&
-            temp[i].join('').match(/O/g) ?
-            temp[i].join('').match(/O/g).length === 2 :
-            false) {
+            temp[i].join('').match(/O/g)?.length === 2) {
             if (i) {
                 playComputerMove(j, j);
             } else {
@@ -225,9 +238,7 @@ function computerTurn() {
         let j = matrix[i].indexOf(null);
 
         if (matrix[i].includes(null) &&
-            matrix[i].join('').match(/X/g) ?
-            matrix[i].join('').match(/X/g).length === 2 :
-            false) {
+            matrix[i].join('').match(/X/g)?.length === 2) {
             playComputerMove(i, j);
             console.log('row threat')
             return;
@@ -244,9 +255,7 @@ function computerTurn() {
         let j = temp.indexOf(null)
 
         if (temp.includes(null) &&
-            temp.join('').match(/X/g) ?
-            temp.join('').match(/X/g).length === 2 :
-            false) {
+            temp.join('').match(/X/g)?.length === 2) {
             playComputerMove(j, i);
             console.log('column threat')
             return;
@@ -264,9 +273,7 @@ function computerTurn() {
     for (let i = 0; i < 2; i++) {
         let j = temp2[i].indexOf(null);
         if (temp2[i].includes(null) &&
-            temp2[i].join('').match(/X/g) ?
-            temp2[i].join('').match(/X/g).length === 2 :
-            false) {
+            temp2[i].join('').match(/X/g)?.length === 2) {
             if (i) {
                 playComputerMove(j, j);
             } else {
@@ -286,9 +293,30 @@ function computerTurn() {
         return;
     };
 
+    // block obscure strategy that is based on luck
+    // todo: implement in a better way
+
+    if (matrix[1][1] &&
+        turn === 2 &&
+        (matrix[0][0] === 'X' ||
+            matrix[0][2] === 'X' ||
+            matrix[2][0] === 'X' ||
+            matrix[2][2] === 'X')) {
+        let i = Math.round(Math.random()) ? 2 : 0;
+        let j = Math.round(Math.random()) ? 2 : 0;
+        while (matrix[i][j]) {
+            i = Math.round(Math.random()) ? 2 : 0;
+            j = Math.round(Math.random()) ? 2 : 0;
+        };
+        playComputerMove(i, j);
+        console.log('block obscire strategy that is based on luck');
+        return;
+    };
+
     // block middle strategy
 
-    if (matrix[1][1] && turn === 1) {
+    if (matrix[1][1] &&
+        turn === 1) {
         let i = Math.round(Math.random()) ? 2 : 0;
         let j = Math.round(Math.random()) ? 2 : 0;
         playComputerMove(i, j);
@@ -298,7 +326,8 @@ function computerTurn() {
 
     // block other middle strategy
 
-    if (matrix[1][1] === 'X' && turn === 3) {
+    if (matrix[1][1] === 'X' &&
+        turn === 3) {
         let i = Math.round(Math.random()) ? 2 : 0;
         let j = Math.round(Math.random()) ? 2 : 0;
         while (matrix[i][j]) {
@@ -309,6 +338,25 @@ function computerTurn() {
         console.log('block other middle strategy');
         return;
     };
+
+    // block that weird strategy using diagonals
+
+    if (((matrix[0][0] === 'X' &&
+        matrix[2][2] === 'X') ||
+        (matrix[0][2] === 'X' &&
+            matrix[2][0] === 'X')) &&
+        turn === 3) {
+        let i = Math.floor(Math.random() * 3);
+        let j = Math.floor(Math.random() * 3);
+        while (i - j != 1 &&
+            i - j != -1) {
+            i = Math.floor(Math.random() * 3);
+            j = Math.floor(Math.random() * 3);
+        };
+        playComputerMove(i, j);
+        console.log('block that weird strategy using diagonals');
+        return;
+    }
 
     // random move if nothing is detected
 

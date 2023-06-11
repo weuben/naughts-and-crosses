@@ -8,6 +8,7 @@
 
 <body>
     <div class='nc-container'>
+        <button onclick='reset()'>test</button>
         <table class='nc-table'>
             <tr class='nc-tr'>
                 <td class='nc-td'></td>
@@ -31,7 +32,13 @@
             <button onclick='reset()'>Play Again</button>
         </div>
         <div class='nc-settings'>
-            <input type='checkbox' id='nc-computer'>Play against computer (potentially unbeatable)</input>
+            Who starts?
+            <select id='nc-starter'>
+                <option value=1>X</option>
+                <option valse=0>O</option>
+            </select>
+            <br>
+            <input type='checkbox' id='nc-computer'>Play against computer (unbeatable)</input>
         </div>
     </div>
     <script src='./script.js'></script>
