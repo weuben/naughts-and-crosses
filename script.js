@@ -294,19 +294,23 @@ function computerTurn() {
     };
 
     // block obscure strategy that is based on luck
-    // todo: implement in a better way
+    // todo: implement in a better way --> done :)
 
     if (matrix[1][1] &&
         turn === 2 &&
-        (matrix[0][0] === 'X' ||
-            matrix[0][2] === 'X' ||
-            matrix[2][0] === 'X' ||
-            matrix[2][2] === 'X')) {
-        let i = Math.round(Math.random()) ? 2 : 0;
-        let j = Math.round(Math.random()) ? 2 : 0;
-        while (matrix[i][j]) {
-            i = Math.round(Math.random()) ? 2 : 0;
-            j = Math.round(Math.random()) ? 2 : 0;
+        ([matrix[0][0],
+        matrix[0][2],
+        matrix[2][0],
+        matrix[2][2]].includes('X'))) {
+        let i = Math.floor(Math.random() * 3);
+        let j = Math.floor(Math.random() * 3);
+        while (matrix[i][j] ||
+            [matrix[i - 1]?.[j],
+            matrix[i + 1]?.[j],
+            matrix[i]?.[j - 1],
+            matrix[i]?.[j + 1]].includes('X')) {
+            i = Math.floor(Math.random() * 3);
+            j = Math.floor(Math.random() * 3);
         };
         playComputerMove(i, j);
         console.log('block obscire strategy that is based on luck');
@@ -344,7 +348,7 @@ function computerTurn() {
     if (((matrix[0][0] === 'X' &&
         matrix[2][2] === 'X') ||
         (matrix[0][2] === 'X' &&
-            matrix[2][0] === 'X')) &&
+        matrix[2][0] === 'X')) &&
         turn === 3) {
         let i = Math.floor(Math.random() * 3);
         let j = Math.floor(Math.random() * 3);
