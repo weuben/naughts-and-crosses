@@ -1,46 +1,50 @@
 <!DOCTYPE html>
-<html>
+<html lang='en'>
 
 <head>
-    <link rel='stylesheet' href='./style.css'>
+    <link rel='stylesheet' href='./src/style.css' />
+    <meta name='viewport' content='width=device-width, initial-scale=1' />
+    <meta name='description' content='Naughts and Crosses' />
     <title>Naughts and Crosses</title>
+    <link rel="prefetch" href="./assets/X.svg" as="image" />
+    <link rel="prefetch" href="./assets/O.svg" as="image" />
 </head>
 
 <body>
-    <div class='nc-container'>
-        <table class='nc-table'>
-            <tr class='nc-tr'>
-                <td class='nc-td'></td>
-                <td class='nc-td'></td>
-                <td class='nc-td'></td>
+    <div class='container'>
+        <table>
+            <tr>
+                <td></td>
+                <td></td>
+                <td></td>
             </tr>
-            <tr class='nc-tr'>
-                <td class='nc-td'></td>
-                <td class='nc-td'></td>
-                <td class='nc-td'></td>
+            <tr>
+                <td></td>
+                <td></td>
+                <td></td>
             </tr>
-            <tr class='nc-tr'>
-                <td class='nc-td'></td>
-                <td class='nc-td'></td>
-                <td class='nc-td'></td>
+            <tr>
+                <td></td>
+                <td></td>
+                <td></td>
             </tr>
         </table>
-        <div class='nc-turn'></div>
-        <div class='nc-winner' style='display:none'>
+        <div class='turn'></div>
+        <div class='winner' style='display:none'>
             <p>won!</p>
             <button onclick='reset()'>Play Again</button>
         </div>
-        <div class='nc-settings'>
+        <div class='settings'>
             Who starts?
-            <select id='nc-starter'>
+            <select id='starter'>
                 <option value=1>X</option>
                 <option valse=0>O</option>
             </select>
             <br>
-            <input type='checkbox' id='nc-computer'>Play against computer (unbeatable)</input>
+            <label><input type='checkbox' id='computer'></input>Play against computer (unbeatable)</label>
         </div>
     </div>
-    <script src='./script.js'></script>
+    <script src='./src/script.js'></script>
 </body>
 
 </html>
