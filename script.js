@@ -180,13 +180,27 @@ function computerMain(target, x, y) { // turn handling
 
 function computerTurn() {
 
+    // arrays i need
+
+    let temp = [[], []];
+    for (let j = 0, k = 2; j < 3; j++, k--) {
+        temp[0].push(matrix[j][k]);
+        temp[1].push(matrix[j][j]);
+    };
+
+    let temp2 = [[], [], []];
+    for (let i = 0; i < 3; i++) {
+        for (let j = 0; j < 3; j++) {
+            temp2[i].push(matrix[j][i]);
+        };
+    };
+  
     // row win opportunities
 
     for (let i = 0; i < 3; i++) {
-        let j = matrix[i].indexOf(null);
-
         if (matrix[i].includes(null) &&
             matrix[i].join('').match(/O/g)?.length === 2) {
+            let j = matrix[i].indexOf(null);
             playComputerMove(i, j);
             console.log('row win opportunity')
             return;
@@ -196,14 +210,9 @@ function computerTurn() {
     // column win opportunities
 
     for (let i = 0; i < 3; i++) {
-        let temp = [];
-        for (let j = 0; j < 3; j++) {
-            temp.push(matrix[j][i]);
-        };
-        let j = temp.indexOf(null);
-
-        if (temp.includes(null) &&
-            temp.join('').match(/O/g)?.length === 2) {
+        if (temp2[i].includes(null) &&
+            temp2[i].join('').match(/O/g)?.length === 2) {
+            let j = temp2[i].indexOf(null);
             playComputerMove(j, i);
             console.log('column win opportunity')
             return;
@@ -212,16 +221,10 @@ function computerTurn() {
 
     // diagonal win opportunities
 
-    let temp = [[], []];
-    for (let j = 0, k = 2; j < 3; j++, k--) {
-        temp[0].push(matrix[j][k]);
-        temp[1].push(matrix[j][j]);
-    };
-
     for (let i = 0; i < 2; i++) {
-        let j = temp[i].indexOf(null);
         if (temp[i].includes(null) &&
             temp[i].join('').match(/O/g)?.length === 2) {
+            let j = temp[i].indexOf(null);
             if (i) {
                 playComputerMove(j, j);
             } else {
@@ -235,10 +238,9 @@ function computerTurn() {
     // row threats
 
     for (let i = 0; i < 3; i++) {
-        let j = matrix[i].indexOf(null);
-
         if (matrix[i].includes(null) &&
             matrix[i].join('').match(/X/g)?.length === 2) {
+            let j = matrix[i].indexOf(null);
             playComputerMove(i, j);
             console.log('row threat')
             return;
@@ -248,14 +250,9 @@ function computerTurn() {
     // column threats
 
     for (let i = 0; i < 3; i++) {
-        let temp = [];
-        for (let j = 0; j < 3; j++) {
-            temp.push(matrix[j][i]);
-        };
-        let j = temp.indexOf(null)
-
-        if (temp.includes(null) &&
-            temp.join('').match(/X/g)?.length === 2) {
+        if (temp2[i].includes(null) &&
+            temp2[i].join('').match(/X/g)?.length === 2) {
+            let j = temp2[i].indexOf(null)
             playComputerMove(j, i);
             console.log('column threat')
             return;
@@ -264,16 +261,10 @@ function computerTurn() {
 
     // diagonal threats
 
-    let temp2 = [[], []];
-    for (let j = 0, k = 2; j < 3; j++, k--) {
-        temp2[0].push(matrix[j][k]);
-        temp2[1].push(matrix[j][j]);
-    };
-
     for (let i = 0; i < 2; i++) {
-        let j = temp2[i].indexOf(null);
-        if (temp2[i].includes(null) &&
-            temp2[i].join('').match(/X/g)?.length === 2) {
+        let j = temp[i].indexOf(null);
+        if (temp[i].includes(null) &&
+            temp[i].join('').match(/X/g)?.length === 2) {
             if (i) {
                 playComputerMove(j, j);
             } else {
@@ -298,22 +289,18 @@ function computerTurn() {
 
     if (matrix[1][1] &&
         turn === 2 &&
-        ([matrix[0][0],
-        matrix[0][2],
-        matrix[2][0],
-        matrix[2][2]].includes('X'))) {
-        let i = Math.floor(Math.random() * 3);
-        let j = Math.floor(Math.random() * 3);
-        while (matrix[i][j] ||
-            [matrix[i - 1]?.[j],
-            matrix[i + 1]?.[j],
-            matrix[i]?.[j - 1],
-            matrix[i]?.[j + 1]].includes('X')) {
-            i = Math.floor(Math.random() * 3);
-            j = Math.floor(Math.random() * 3);
+        (matrix[0][0] === 'X' ||
+            matrix[0][2] === 'X' ||
+            matrix[2][0] === 'X' ||
+            matrix[2][2] === 'X')) {
+        let i = Math.round(Math.random()) ? 2 : 0;
+        let j = Math.round(Math.random()) ? 2 : 0;
+        while (matrix[i][j]) {
+            i = Math.round(Math.random()) ? 2 : 0;
+            j = Math.round(Math.random()) ? 2 : 0;
         };
         playComputerMove(i, j);
-        console.log('block obscire strategy that is based on luck');
+        console.log('block obscure strategy that is based on luck');
         return;
     };
 
@@ -360,21 +347,24 @@ function computerTurn() {
         playComputerMove(i, j);
         console.log('block that weird strategy using diagonals');
         return;
-    }
+    };
 
     // random move if nothing is detected
 
-    let i = Math.floor(Math.random() * 3);
-    while (!matrix[i].includes(null)) {
-        i = Math.floor(Math.random() * 3);
+    for (let i = 0; i < 3; i++) {  
+        let i = Math.floor(Math.random() * 3);
+        let j = Math.floor(Math.random() * 3);
+        while (matrix[i][j] ||
+               (turn === 2 &&
+               (matrix[i].filter(x => !x).length === 1 ||
+               temp2[j].filter(x => !x).length === 1))) {
+            i = Math.floor(Math.random() * 3);
+            j = Math.floor(Math.random() * 3);
+        };
+        playComputerMove(i, j);
+        console.log('random');
+        return;
     };
-    let j = Math.floor(Math.random() * 3);
-    while (matrix[i][j]) {
-        j = Math.floor(Math.random() * 3);
-    };
-    playComputerMove(i, j);
-    console.log('random');
-    return;
 };
 
 function playComputerMove(x, y) {
