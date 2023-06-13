@@ -11,11 +11,7 @@
 
 // variable section -------------------------------------------->
 
-const table = document.querySelector('table');
-const tr1 = table.children[0].children[0].children;
-const tr2 = table.children[0].children[1].children;
-const tr3 = table.children[0].children[2].children;
-const tbody = [tr1, tr2, tr3]
+const tbody = Array.from(document.querySelectorAll('tr')).map(row => Array.from(row.children));
 const turnEl = document.querySelector('.turn');
 const computer = document.querySelector('#computer');
 const winnerEl = document.querySelector('.winner');
@@ -26,27 +22,18 @@ var turn = 0, matrix, wincount = [0, 0];
 
 // listener section -------------------------------------------->
 
-window.onload = start;
+document.addEventListener('DOMContentLoaded', start);
 
 computer.onchange = reset;
 starterEl.onchange = reset;
 
-// that one function that i need that one time section --------->
-
-Array.prototype.deepIncludes = function (x) { // because Array.prototype.includes() doesnt work for 2d arrays
-    for (let i = 0; i < this.length; i++) {
-        if (this[i].includes(x)) {
-            return true;
-        };
-    };
-    return false;
-};
-
 // normal play section ----------------------------------------->
 
-function main(target, x, y) { // turn handling
+function main(target) { // turn handling
     if (target.innerHTML) { return };
     target.innerHTML = `<img src='./assets/${calcTurn()}.svg'/>`;
+    let x = tbody.findIndex(row => row.includes(target));
+    let y = tbody[x].indexOf(target);
     matrix[x][y] = calcTurn();
     if (evaluate()) { return };
     turn++;
@@ -57,7 +44,7 @@ function evaluate() { // evaluating the board :)
     if (check()) {
         stop(`${check()} won!`);
         return true;
-    } else if (!matrix.deepIncludes(null)) { // check for draw
+    } else if (!matrix.flat().includes(null)) { // check for draw
         stop('Draw :(');
         return true;
     };
@@ -104,13 +91,7 @@ function start() {
         starterEl[1].innerText = 'O';
     };
     turnEl.innerText = `Turn: ${calcTurn()}`;
-    for (let i = 0; i < 3; i++) {
-        for (let j = 0; j < 3; j++) {
-            tbody[i][j].onclick = (e) => {
-                main(e.target, i, j)
-            };
-        };
-    };
+    tbody.flat().forEach(cell => cell.onclick = (e) => main(e.target))
 };
 
 function reset() { // reset the game duh
@@ -118,11 +99,7 @@ function reset() { // reset the game duh
     winnerEl.style.display = 'none';
     turnEl.style.display = 'block';
     turn = 0;
-    for (let i = 0; i < 3; i++) {
-        for (let j = 0; j < 3; j++) {
-            tbody[i][j].innerHTML = '';
-        };
-    };
+    tbody.flat().forEach(cell => (cell.innerHTML = ''));
     start();
 };
 
@@ -132,49 +109,31 @@ function stop(msg) { // stop the click listeners for when game has stopped
         winnerEl.children[0].innerText = msg;
         winnerEl.style.display = 'block';
     }, 50);
-    for (let i = 0; i < 3; i++) {
-        for (let j = 0; j < 3; j++) {
-            tbody[i][j].onclick = null;
-        };
-    };
+    tbody.flat().forEach(cell => (cell.onclick = null));
 };
 
 function calcTurn() {
-    if (computer.checked) {
-        x = 'Computer';
-        o = 'You';
-    } else {
-        x = 'X';
-        o = 'O';
-    };
-    return parseInt(starterEl.value) ?
-        turn % 2 ? o : x :
-        turn % 2 ? x : o;
-}
+    return turn % 2 - starter() ? 'X' : 'O';
+};
 
 // computer section -------------------------------------------->
 
 function playComputer() { // seperate game loop for computer woo
-    turnEl.innerText = `Turn: ${calcTurn()}`;
+    turnEl.innerText = 'Turn: You';
     if (!starter()) {
         computerTurn();
     };
-    for (let i = 0; i < 3; i++) {
-        for (let j = 0; j < 3; j++) {
-            tbody[i][j].onclick = (e) => {
-                computerMain(e.target, i, j)
-            };
-        };
-    };
+    tbody.flat().forEach(cell => cell.onclick = (e) => computerMain(e.target))
 };
 
-function computerMain(target, x, y) { // turn handling
+function computerMain(target) { // turn handling
     if (target.innerHTML) { return };
     target.innerHTML = `<img src='./assets/X.svg'/>`;
+    let x = tbody.findIndex(row => row.includes(target));
+    let y = tbody[x].indexOf(target);
     matrix[x][y] = 'X';
     if (evaluate()) { return };
     turn++;
-    turnEl.innerText = `Turn: ${calcTurn()}`;
     computerTurn();
 };
 
@@ -194,7 +153,7 @@ function computerTurn() {
             temp2[i].push(matrix[j][i]);
         };
     };
-
+  
     // row win opportunities
 
     for (let i = 0; i < 3; i++) {
@@ -296,17 +255,17 @@ function computerTurn() {
         let i = Math.floor(Math.random() * 3);
         let j = Math.floor(Math.random() * 3);
         while (matrix[i][j] ||
-            [matrix[i - 1]?.[j],
-            matrix[i + 1]?.[j],
-            matrix[i]?.[j - 1],
-            matrix[i]?.[j + 1]].includes('X') ||
-            (i + j > 0 && i + j < 4 ?
-                matrix[j][i] :
-                i + j ?
-                    matrix[2][2] :
-                    matrix[0][0])) {
-            i = Math.floor(Math.random() * 3);
-            j = Math.floor(Math.random() * 3);
+               [matrix[i - 1]?.[j],
+               matrix[i + 1]?.[j],
+               matrix[i]?.[j - 1],
+               matrix[i]?.[j + 1]].includes('X') ||
+               (i + j > 0 && i + j < 4 ?
+               matrix[j][i] :
+               i + j ?
+               matrix[2][2] :
+               matrix[0][0])) {
+              i = Math.floor(Math.random() * 3);
+              j = Math.floor(Math.random() * 3);
         };
         playComputerMove(i, j);
         console.log('block obscure strategy that is based on luck');
@@ -344,7 +303,7 @@ function computerTurn() {
     if (((matrix[0][0] === 'X' &&
         matrix[2][2] === 'X') ||
         (matrix[0][2] === 'X' &&
-            matrix[2][0] === 'X')) &&
+        matrix[2][0] === 'X')) &&
         turn === 3) {
         let i = Math.floor(Math.random() * 3);
         let j = Math.floor(Math.random() * 3);
@@ -360,13 +319,13 @@ function computerTurn() {
 
     // random move if nothing is detected
 
-    for (let i = 0; i < 3; i++) {
+    for (let i = 0; i < 3; i++) {  
         let i = Math.floor(Math.random() * 3);
         let j = Math.floor(Math.random() * 3);
         while (matrix[i][j] ||
-            (turn === 2 &&
-                (matrix[i].filter(x => !x).length === 1 ||
-                    temp2[j].filter(x => !x).length === 1))) {
+               (turn === 2 &&
+               (matrix[i].filter(x => !x).length === 1 ||
+               temp2[j].filter(x => !x).length === 1))) {
             i = Math.floor(Math.random() * 3);
             j = Math.floor(Math.random() * 3);
         };
